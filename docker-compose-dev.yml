@@ -1,0 +1,42 @@
+version: '3.5'
+services:
+  db:
+    image: postgres:15.1
+    restart: always
+    environment:
+      POSTGRES_USER: dbuser
+      POSTGRES_PASSWORD: dbuser
+      POSTGRES_DB: base-stack
+      #POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+
+  frontend:
+    image: node:18.4.0
+    working_dir: /app
+    user: $UID:$GID
+    command: bash -c "npm i --force && npm run serve"
+    ports:
+      - "1504:1504"
+    environment:
+      - VUE_APP_API_URL=http://localhost:1987
+    volumes:
+      - ./src/main/webapp:/app
+
+  backend:
+    image: maven:3
+    depends_on:
+      - db
+    working_dir: /app
+    user: $UID:$GID
+    command: mvn spring-boot:run -Dspring-boot.run.profiles.active=dev
+    ports:
+      - "1987:1987"
+    environment:
+      - spring_profiles_active=dev
+      - spring_datasource_url=jdbc:postgresql://db:5432/base-stack
+    volumes:
+      - .:/app
+      - $HOME/.m2:/root/.m2

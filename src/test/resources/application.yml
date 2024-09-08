@@ -1,0 +1,15 @@
+server:
+  port: 1987
+
+app:
+  cors.origins: "http://localhost:1504"
+  jwtSecret: "jwtSecret"
+  jwtExpiration: 86400000
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:base-stack
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: true
